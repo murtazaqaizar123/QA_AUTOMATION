@@ -92,6 +92,7 @@ program
     'User story (e.g. "As a Builder, I want to create a Draw Request")'
   )
   .option("--output <dir>", "Output directory for test case files", "./output")
+  .option("--skip-hitl", "Skip human review and auto-approve test cases")
   .action(async (opts) => {
     console.log(chalk.bold.cyan("\n🏭  QA Factory — Starting Pipeline\n"));
 
@@ -136,7 +137,10 @@ program
     const runConfig = { configurable: { thread_id: threadId } };
 
     const initialState = {
-      projectConfig: project,
+      projectConfig: {
+        ...project,
+        outputPath: opts.output,
+      },
       userStory: finalStory,
     };
 
@@ -151,7 +155,38 @@ program
       if (nodeName === "__interrupt__") {
         interrupted = true;
         const payload = (nodeOutput as { value: Record<string, unknown> }[])[0].value;
-        await handleHITLReview(payload, workflow, threadId, opts.output, project.projectId, finalStory);
+        
+        if (opts.skipHitl) {
+          // Auto-approve and continue
+          console.log(chalk.green("✓ Auto-approving (--skip-hitl)"));
+          const { Command: LGCommand } = await import("@langchain/langgraph");
+          const resumeCommand = new LGCommand({ resume: { decision: "approved", feedback: "" } });
+          const resumeConfig = { configurable: { thread_id: threadId } };
+          
+          for await (const resumeEvent of await workflow.stream(resumeCommand, resumeConfig)) {
+            const [rNodeName] = Object.entries(resumeEvent)[0] as [string, unknown];
+            if (rNodeName !== "__interrupt__") {
+              console.log(chalk.green(`  ✓ ${rNodeName}`));
+            }
+          }
+          
+          // Save output
+          const testCases = payload["testCases"] as TestCase[] ?? [];
+          await saveTestCaseOutput(testCases, finalStory, opts.output, project.projectId);
+          
+          // List generated specs
+          const specsDir = path.resolve(opts.output, project.projectId, "specs");
+          if (fs.existsSync(specsDir)) {
+            const specFiles = fs.readdirSync(specsDir).filter((f) => f.endsWith(".spec.js"));
+            if (specFiles.length > 0) {
+              console.log(chalk.bold.magenta(`\n📋 Generated ${specFiles.length} Playwright spec file(s):`));
+              specFiles.forEach((f) => console.log(chalk.cyan(`  ✓ ${f}`)));
+              console.log(chalk.gray(`\n📂 Location: ${specsDir}`));
+            }
+          }
+        } else {
+          await handleHITLReview(payload, workflow, threadId, opts.output, project.projectId, finalStory);
+        }
         break;
       } else {
         const agentOutput = nodeOutput as Record<string, unknown>;
@@ -283,6 +318,21 @@ async function handleHITLReview(
   // Save test cases to markdown output
   if (decision === "approved") {
     await saveTestCaseOutput(testCases, userStory, outputDir, projectId);
+    
+    // List generated Playwright specs
+    const specsDir = path.resolve(outputDir, projectId, "specs");
+    if (fs.existsSync(specsDir)) {
+      const specFiles = fs.readdirSync(specsDir).filter((f) => f.endsWith(".spec.js"));
+      if (specFiles.length > 0) {
+        console.log(chalk.bold.magenta(`\n📋 Generated ${specFiles.length} Playwright spec file(s):`));
+        specFiles.forEach((f) => {
+          const specPath = path.join(specsDir, f);
+          console.log(chalk.cyan(`  ✓ ${f}`));
+        });
+        console.log(chalk.gray(`\n📂 Location: ${specsDir}`));
+        console.log(chalk.gray(`   Run specs: npx playwright test ${path.join(outputDir, projectId, "specs")}`));
+      }
+    }
   }
 }
 

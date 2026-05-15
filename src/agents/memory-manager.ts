@@ -5,6 +5,7 @@ import { QAFactoryState } from "../graph/state.js";
 import { querySemanticFacts, upsertSemanticFacts } from "../memory/semantic-store.js";
 import { queryProceduralRules, upsertProceduralRule } from "../memory/procedural-store.js";
 import { getLLM } from "../utils/llm.js";
+import { queuedLLMInvoke, drainQueue } from "../utils/queued-llm.js";
 import { agentLogger } from "../utils/logger.js";
 import { HumanMessage } from "@langchain/core/messages";
 
@@ -54,7 +55,7 @@ Feedback: "${feedback}"
 Respond with JSON only:
 { "isRule": true/false, "ruleText": "concise imperative rule if isRule is true, else null" }`;
 
-  const response = await llm.invoke([new HumanMessage(prompt)]);
+  const response = await queuedLLMInvoke([new HumanMessage(prompt)], { temperature: 0 }, 1); // Higher priority
   try {
     const text = typeof response.content === "string" ? response.content : "";
     const json = text.match(/\{[^}]+\}/)?.[0] ?? "{}";
@@ -124,6 +125,9 @@ export async function memoryPersistNode(
       log.info(`Persisted new procedural rule from HITL: "${classification.ruleText}"`);
     }
   }
+
+  // Drain any remaining queued requests
+  await drainQueue();
 
   return { currentAgent: "memory-persist" };
 }

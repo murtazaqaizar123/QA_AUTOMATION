@@ -1,0 +1,106 @@
+{
+  "C:\\Users\\murta\\OneDrive\\Desktop\\prd\\qa-factory\\src\\index.ts": {
+    "mtime": 1777552812.8370125,
+    "hash": "9a2c02d68ac2e462c5e391feb96d1ae4"
+  },
+  "C:\\Users\\murta\\OneDrive\\Desktop\\prd\\qa-factory\\src\\agents\\documenter.ts": {
+    "mtime": 1777548563.4896557,
+    "hash": "da999bcfe1d3a4a39dfdc46b92da6338"
+  },
+  "C:\\Users\\murta\\OneDrive\\Desktop\\prd\\qa-factory\\src\\agents\\memory-manager.ts": {
+    "mtime": 1777541114.8028862,
+    "hash": "2849544541a0478ce0813f4bbe764e28"
+  },
+  "C:\\Users\\murta\\OneDrive\\Desktop\\prd\\qa-factory\\src\\agents\\qa-architect.ts": {
+    "mtime": 1777558895.064945,
+    "hash": "9595d5bed87483d51865fb710e8ffc7b"
+  },
+  "C:\\Users\\murta\\OneDrive\\Desktop\\prd\\qa-factory\\src\\agents\\surveyor.ts": {
+    "mtime": 1777541116.2024498,
+    "hash": "f33c7553aa2385f4fcc0b1db8713a409"
+  },
+  "C:\\Users\\murta\\OneDrive\\Desktop\\prd\\qa-factory\\src\\graph\\edges.ts": {
+    "mtime": 1777541204.820386,
+    "hash": "a924e236da4ade9e2991575a2deb34ec"
+  },
+  "C:\\Users\\murta\\OneDrive\\Desktop\\prd\\qa-factory\\src\\graph\\state.ts": {
+    "mtime": 1777541188.4597332,
+    "hash": "91835bb30b2a131dd4ed3b9d239aa200"
+  },
+  "C:\\Users\\murta\\OneDrive\\Desktop\\prd\\qa-factory\\src\\graph\\workflow.ts": {
+    "mtime": 1777552172.6779597,
+    "hash": "072a6b117b121d0334a0fa987dfa465a"
+  },
+  "C:\\Users\\murta\\OneDrive\\Desktop\\prd\\qa-factory\\src\\memory\\procedural-store.ts": {
+    "mtime": 1777552361.8950436,
+    "hash": "5cbcf5e37b166e404ba7ac8a2a979f07"
+  },
+  "C:\\Users\\murta\\OneDrive\\Desktop\\prd\\qa-factory\\src\\memory\\qdrant-client.ts": {
+    "mtime": 1777551405.7693312,
+    "hash": "a482c8036433eb1d28b3f54c28cd630b"
+  },
+  "C:\\Users\\murta\\OneDrive\\Desktop\\prd\\qa-factory\\src\\memory\\semantic-store.ts": {
+    "mtime": 1777552388.239983,
+    "hash": "2616c2af95bc613b38e99df08562885e"
+  },
+  "C:\\Users\\murta\\OneDrive\\Desktop\\prd\\qa-factory\\src\\parsers\\api-route-parser.ts": {
+    "mtime": 1777541031.0985336,
+    "hash": "016e8671d6dd88dd6d3c74165034629a"
+  },
+  "C:\\Users\\murta\\OneDrive\\Desktop\\prd\\qa-factory\\src\\parsers\\component-parser.ts": {
+    "mtime": 1777541041.2221901,
+    "hash": "746a2e1e04eefec6711f2e4ace74c069"
+  },
+  "C:\\Users\\murta\\OneDrive\\Desktop\\prd\\qa-factory\\src\\parsers\\index.ts": {
+    "mtime": 1777541042.5358243,
+    "hash": "ea6ce8754f3dc48ab4550a91e3c8aff8"
+  },
+  "C:\\Users\\murta\\OneDrive\\Desktop\\prd\\qa-factory\\src\\parsers\\prisma-parser.ts": {
+    "mtime": 1777541012.3007894,
+    "hash": "938e130597e52809bdb6a1d857085eda"
+  },
+  "C:\\Users\\murta\\OneDrive\\Desktop\\prd\\qa-factory\\src\\projects\\project-config.ts": {
+    "mtime": 1777541227.5862978,
+    "hash": "960b207d4c54081e2645a896518ab27c"
+  },
+  "C:\\Users\\murta\\OneDrive\\Desktop\\prd\\qa-factory\\src\\projects\\registry.ts": {
+    "mtime": 1777541228.8948324,
+    "hash": "c3f097f252e3232914d5e952042af23c"
+  },
+  "C:\\Users\\murta\\OneDrive\\Desktop\\prd\\qa-factory\\src\\types\\codebase.ts": {
+    "mtime": 1777540923.8819616,
+    "hash": "0adb604c41b5d8f078765891cde47766"
+  },
+  "C:\\Users\\murta\\OneDrive\\Desktop\\prd\\qa-factory\\src\\types\\documents.ts": {
+    "mtime": 1777540930.371761,
+    "hash": "9f38ea86874346d275aba0bd00fac489"
+  },
+  "C:\\Users\\murta\\OneDrive\\Desktop\\prd\\qa-factory\\src\\types\\project.ts": {
+    "mtime": 1777540916.61551,
+    "hash": "0b7cb4c592f332ee29b09c1230355340"
+  },
+  "C:\\Users\\murta\\OneDrive\\Desktop\\prd\\qa-factory\\src\\types\\test-case.ts": {
+    "mtime": 1777540932.4058182,
+    "hash": "f7550e7a0a4db88f72f5cbec6ad6318d"
+  },
+  "C:\\Users\\murta\\OneDrive\\Desktop\\prd\\qa-factory\\src\\utils\\config.ts": {
+    "mtime": 1777549703.406411,
+    "hash": "e847ea9ebb8b0a9682162c5c6fe3e424"
+  },
+  "C:\\Users\\murta\\OneDrive\\Desktop\\prd\\qa-factory\\src\\utils\\file-scanner.ts": {
+    "mtime": 1777540968.460394,
+    "hash": "f3f5db896737cc1301f610969e2d27b9"
+  },
+  "C:\\Users\\murta\\OneDrive\\Desktop\\prd\\qa-factory\\src\\utils\\llm.ts": {
+    "mtime": 1777549707.3695114,
+    "hash": "43862b9cad405ba9626dd85f80e8238e"
+  },
+  "C:\\Users\\murta\\OneDrive\\Desktop\\prd\\qa-factory\\src\\utils\\logger.ts": {
+    "mtime": 1777540962.0714993,
+    "hash": "c3e4ce737d5b2b539f10e496d2a2a0b2"
+  },
+  "C:\\Users\\murta\\OneDrive\\Desktop\\prd\\qa-factory\\README.md": {
+    "mtime": 1777548989.8136635,
+    "hash": "0809f8e49231074bc9ebb36779334a22"
+  }
+}

@@ -19,6 +19,8 @@ export interface ProjectConfig {
   prismaSchemaPath?: string;
   /** Directories to exclude from scanning (in addition to node_modules, .git) */
   excludeDirs?: string[];
+  /** Output directory for generated specs and artifacts */
+  outputPath?: string;
 }
 
 export interface ProjectRegistry {

@@ -7,19 +7,19 @@ const MAX_ITERATIONS = 3;
 
 /**
  * After the HITL review gate resolves.
- * - approved → persist memory and finish
+ * - approved → generate Playwright specs → persist memory and finish
  * - revision_requested → loop back to QA Architect (max 3 times)
  * - rejected → end
  * - errors hit → end with error
  */
 export function routeAfterReview(
   state: typeof QAFactoryState.State
-): "memory_persist" | "qa_architect" | "__end__" {
+): "playwright_coder" | "memory_persist" | "qa_architect" | "__end__" {
   if (state.errors.length > 0) return "__end__";
 
   switch (state.reviewDecision) {
     case "approved":
-      return "memory_persist";
+      return "playwright_coder";
     case "revision_requested":
       if (state.iterationCount >= MAX_ITERATIONS) {
         // Safety valve: after 3 revision loops, stop

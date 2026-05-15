@@ -3,7 +3,9 @@
 // ─────────────────────────────────────────────────────────────
 import { QAFactoryState } from "../graph/state.js";
 import { getLLM } from "../utils/llm.js";
+import { queuedLLMInvoke, drainQueue, getQueueStatus } from "../utils/queued-llm.js";
 import { TestCase, TestSuite } from "../types/test-case.js";
+import { TechnicalPRD } from "../types/documents.js";
 import { agentLogger } from "../utils/logger.js";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { v4 as uuidv4 } from "uuid";
@@ -37,7 +39,9 @@ Every test case MUST include:
 Apply the procedural rules to every applicable test case.
 
 CRITICAL INSTRUCTION ON VOLUME AND PAIRING:
-You are an enterprise QA architect. You must generate at least 10 to 15 Paired Scenarios. Every positive test case MUST have a matching negative/edge case immediately following it. Do not stop early. Do not summarize. Be exhaustively detailed.
+Generate a compact, reliable set of scenarios. Prefer 2 to 4 paired scenarios per feature, not 10 to 15.
+Every positive test case MUST have a matching negative/edge case immediately following it.
+Keep each step concise so the response stays small and fast to generate.
 
 Respond ONLY with valid JSON:
 {
@@ -69,10 +73,10 @@ Respond ONLY with valid JSON:
 // ── Helper: extract feature groups from the user story ─────────
 
 async function extractFeatureGroups(userStory: string, llm: ReturnType<typeof getLLM>): Promise<string[]> {
-  const response = await llm.invoke([
+  const response = await queuedLLMInvoke([
     new SystemMessage("You are a QA analyst. Extract all distinct testable feature groups from the user story. Each feature group should represent one specific user action or UI behavior (e.g., 'Add Phase', 'Delete Phase', 'Import CSV', etc.)."),
     new HumanMessage(`User Story:\n${userStory}\n\nRespond ONLY with a JSON array of short feature group names:\n["feature 1", "feature 2", ...]`),
-  ]);
+  ], { temperature: 0.2 }, 1); // priority 1 = higher priority for initial feature extraction
   const text = typeof response.content === "string" ? response.content : "";
   const match = text.match(/\[[\s\S]*?\]/);
   if (!match) return ["All Features"];
@@ -84,7 +88,7 @@ async function extractFeatureGroups(userStory: string, llm: ReturnType<typeof ge
 async function generateForFeature(
   feature: string,
   userStory: string,
-  technicalPRD: typeof import("../types/technical-prd.js").TechnicalPRD | null,
+  technicalPRD: TechnicalPRD | null,
   gapAnalysis: Array<{ severity: string; area: string; businessRequirement: string; technicalReality: string }>,
   relevantProceduralRules: string[],
   projectConfig: { projectName: string; projectId: string },
@@ -112,15 +116,16 @@ ${relevantProceduralRules.map((r, i) => `${i + 1}. ${r}`).join("\n")}
 Project: ${projectConfig.projectName} (${projectConfig.projectId})
 
 For the feature "${feature}", generate paired test cases:
-1. At least one detailed POSITIVE scenario (valid data, correct role, happy path)
-2. At least two detailed NEGATIVE/EDGE scenarios (invalid inputs, wrong role, boundary values, concurrent access)
+1. One POSITIVE scenario (valid data, correct role, happy path)
+2. One NEGATIVE or EDGE scenario (invalid inputs, wrong role, boundary values, or concurrent access)
+3. Keep the response concise and focused on the core assertions
 
 Generate test cases now.`;
 
-  const response = await llm.invoke([
+  const response = await queuedLLMInvoke([
     new SystemMessage(SYSTEM_PROMPT),
     new HumanMessage(prompt),
-  ]);
+  ], { temperature: 0.2 }, 0); // priority 0 = normal priority for feature generation
   const text = typeof response.content === "string" ? response.content : "";
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   if (!jsonMatch) return { testCases: [], mutationInsights: [] };
@@ -150,7 +155,7 @@ export async function qaArchitectNode(
   );
 
   try {
-    const llm = getLLM({ temperature: 0.3 });
+    const llm = getLLM({ temperature: 0.2 });
 
     // Step 1: Extract all feature groups from the user story
     log.info("Extracting feature groups from user story...");
@@ -161,14 +166,19 @@ export async function qaArchitectNode(
     const effectiveSystemPrompt = humanFeedback
       ? `${SYSTEM_PROMPT}\n\n## Human Reviewer Feedback (MUST address)\n${humanFeedback}`
       : SYSTEM_PROMPT;
-    const effectiveLlm = getLLM({ temperature: 0.3 });
-    void effectiveSystemPrompt; // used in closure below
+    const effectiveLlm = getLLM({ temperature: 0.2 });
+    void effectiveSystemPrompt; // kept for revision feedback compatibility
 
     // Step 3: Run one generation pass per feature group (sequential)
     const allRawTestCases: Array<Record<string, unknown>> = [];
     const allMutationInsights: string[] = [];
 
-    for (const feature of featureGroups) {
+    const cappedFeatures = featureGroups.slice(0, 10);
+    if (featureGroups.length > cappedFeatures.length) {
+      log.warn(`Capping feature generation to ${cappedFeatures.length} groups to avoid model timeouts.`);
+    }
+
+    for (const feature of cappedFeatures) {
       log.info(`Generating paired test cases for feature: "${feature}"`);
       const result = await generateForFeature(
         feature, userStory, technicalPRD, gapAnalysis,
@@ -197,8 +207,11 @@ export async function qaArchitectNode(
       })
     );
 
+    // Drain any remaining queued requests before returning
+    await drainQueue();
+
     log.info(
-      `Generated ${testCases.length} test cases: ` +
+      `Generated ${testCases.length} test cases from ${cappedFeatures.length} feature group(s): ` +
       `${testCases.filter((t) => t.category === "positive").length} positive, ` +
       `${testCases.filter((t) => t.category === "negative").length} negative, ` +
       `${testCases.filter((t) => t.category === "edge").length} edge`

@@ -11,6 +11,7 @@ import { memoryRecallNode, memoryPersistNode } from "../agents/memory-manager.js
 import { surveyorNode } from "../agents/surveyor.js";
 import { documenterNode } from "../agents/documenter.js";
 import { qaArchitectNode } from "../agents/qa-architect.js";
+import { playwrightCoderNode } from "../agents/playwright-coder.js";
 import { logger } from "../utils/logger.js";
 
 // ── HITL Review Gate ──────────────────────────────────────────
@@ -59,6 +60,7 @@ export function buildWorkflow() {
     .addNode("documenter", documenterNode)
     .addNode("qa_architect", qaArchitectNode)
     .addNode("hitl_review", hitlReviewNode)
+    .addNode("playwright_coder", playwrightCoderNode)
     .addNode("memory_persist", memoryPersistNode)
 
     // ── Edges ──
@@ -70,11 +72,13 @@ export function buildWorkflow() {
 
     // HITL conditional routing
     .addConditionalEdges("hitl_review", routeAfterReview, {
+      playwright_coder: "playwright_coder",
       memory_persist: "memory_persist",
       qa_architect: "qa_architect",
       __end__: END,
     })
 
+    .addEdge("playwright_coder", "memory_persist")
     .addEdge("memory_persist", END);
 
   // MemorySaver for dev (no native build required).

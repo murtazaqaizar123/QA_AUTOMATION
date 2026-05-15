@@ -76,6 +76,41 @@ export const QAFactoryState = Annotation.Root({
     default: () => "",
   }),
 
+  // ── Playwright Coder output ───────────────────────────────
+  generatedPlaywrightSpecs: Annotation<
+    Array<{
+      testCaseId: string;
+      specFile: string;
+      selectorMatches: Array<{
+        testId: string;
+        componentName: string;
+        found: boolean;
+        locator?: string;
+        fallback?: string;
+      }>;
+      errors: string[];
+    }>
+  >({
+    reducer: (_, next) => next,
+    default: () => [],
+  }),
+  selectorMismatches: Annotation<
+    Array<{
+      testCaseId: string;
+      testCaseTitle: string;
+      mismatches: Array<{
+        testId: string;
+        componentName: string;
+        found: boolean;
+        locator?: string;
+        fallback?: string;
+      }>;
+    }>
+  >({
+    reducer: (_, next) => next,
+    default: () => [],
+  }),
+
   // ── Control ──────────────────────────────────────────────
   currentAgent: Annotation<string>({
     reducer: (_, next) => next,

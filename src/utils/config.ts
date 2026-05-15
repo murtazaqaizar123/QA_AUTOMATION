@@ -15,6 +15,7 @@ function optional(key: string, fallback: string): string {
 }
 
 export const config = {
+  llmProvider: optional("LLM_PROVIDER", "openrouter"),
   llm: {
     openrouterApiKey: optional("OPENROUTER_API_KEY", ""),
     model: optional("OPENROUTER_MODEL", "google/gemma-3-27b-it"),

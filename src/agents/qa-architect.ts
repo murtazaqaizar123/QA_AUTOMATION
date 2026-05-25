@@ -39,9 +39,7 @@ Every test case MUST include:
 Apply the procedural rules to every applicable test case.
 
 CRITICAL INSTRUCTION ON VOLUME AND PAIRING:
-Generate a compact, reliable set of scenarios. Prefer 2 to 4 paired scenarios per feature, not 10 to 15.
-Every positive test case MUST have a matching negative/edge case immediately following it.
-Keep each step concise so the response stays small and fast to generate.
+You are an enterprise QA architect. You must generate at least 10 to 15 Paired Scenarios. Every positive test case MUST have a matching negative/edge case immediately following it. Do not stop early. Do not summarize. Be exhaustively detailed.
 
 Respond ONLY with valid JSON:
 {
@@ -116,9 +114,8 @@ ${relevantProceduralRules.map((r, i) => `${i + 1}. ${r}`).join("\n")}
 Project: ${projectConfig.projectName} (${projectConfig.projectId})
 
 For the feature "${feature}", generate paired test cases:
-1. One POSITIVE scenario (valid data, correct role, happy path)
-2. One NEGATIVE or EDGE scenario (invalid inputs, wrong role, boundary values, or concurrent access)
-3. Keep the response concise and focused on the core assertions
+1. At least one detailed POSITIVE scenario (valid data, correct role, happy path)
+2. At least two detailed NEGATIVE/EDGE scenarios (invalid inputs, wrong role, boundary values, concurrent access)
 
 Generate test cases now.`;
 
@@ -173,12 +170,7 @@ export async function qaArchitectNode(
     const allRawTestCases: Array<Record<string, unknown>> = [];
     const allMutationInsights: string[] = [];
 
-    const cappedFeatures = featureGroups.slice(0, 10);
-    if (featureGroups.length > cappedFeatures.length) {
-      log.warn(`Capping feature generation to ${cappedFeatures.length} groups to avoid model timeouts.`);
-    }
-
-    for (const feature of cappedFeatures) {
+    for (const feature of featureGroups) {
       log.info(`Generating paired test cases for feature: "${feature}"`);
       const result = await generateForFeature(
         feature, userStory, technicalPRD, gapAnalysis,
@@ -211,7 +203,7 @@ export async function qaArchitectNode(
     await drainQueue();
 
     log.info(
-      `Generated ${testCases.length} test cases from ${cappedFeatures.length} feature group(s): ` +
+      `Generated ${testCases.length} test cases from ${featureGroups.length} feature group(s): ` +
       `${testCases.filter((t) => t.category === "positive").length} positive, ` +
       `${testCases.filter((t) => t.category === "negative").length} negative, ` +
       `${testCases.filter((t) => t.category === "edge").length} edge`

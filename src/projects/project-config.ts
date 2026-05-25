@@ -25,16 +25,16 @@ export function resolveProjectPaths(
 /**
  * Validate that a project config points to real paths.
  */
-export function validateProjectConfig(project: ProjectConfig): string[] {
+export function validateProjectConfig(project: ProjectConfig, mode: "full" | "prd-only" = "full"): string[] {
   const errors: string[] = [];
 
-  if (!fs.existsSync(project.codebasePath)) {
+  if (mode !== "prd-only" && !fs.existsSync(project.codebasePath)) {
     errors.push(`Codebase path not found: ${project.codebasePath}`);
   }
   if (!fs.existsSync(project.prdPath)) {
     errors.push(`PRD file not found: ${project.prdPath}`);
   }
-  if (project.prismaSchemaPath && !fs.existsSync(project.prismaSchemaPath)) {
+  if (mode !== "prd-only" && project.prismaSchemaPath && !fs.existsSync(project.prismaSchemaPath)) {
     errors.push(`Prisma schema not found: ${project.prismaSchemaPath}`);
   }
 

@@ -9,6 +9,7 @@ import { QAFactoryState } from "./state.js";
 import { routeAfterReview } from "./edges.js";
 import { memoryRecallNode, memoryPersistNode } from "../agents/memory-manager.js";
 import { surveyorNode } from "../agents/surveyor.js";
+import { prdExtractorNode } from "../agents/prd-extractor.js";
 import { documenterNode } from "../agents/documenter.js";
 import { qaArchitectNode } from "../agents/qa-architect.js";
 import { playwrightCoderNode } from "../agents/playwright-coder.js";
@@ -57,6 +58,7 @@ export function buildWorkflow() {
   const graph = new StateGraph(QAFactoryState)
     .addNode("memory_recall", memoryRecallNode)
     .addNode("surveyor", surveyorNode)
+    .addNode("prd_extractor", prdExtractorNode)
     .addNode("documenter", documenterNode)
     .addNode("qa_architect", qaArchitectNode)
     .addNode("hitl_review", hitlReviewNode)
@@ -65,7 +67,13 @@ export function buildWorkflow() {
 
     // ── Edges ──
     .addEdge(START, "memory_recall")
-    .addEdge("memory_recall", "surveyor")
+    .addConditionalEdges("memory_recall", (state) => {
+      return state.pipelineMode === "prd-only" ? "prd_extractor" : "surveyor";
+    }, {
+      prd_extractor: "prd_extractor",
+      surveyor: "surveyor",
+    })
+    .addEdge("prd_extractor", "documenter")
     .addEdge("surveyor", "documenter")
     .addEdge("documenter", "qa_architect")
     .addEdge("qa_architect", "hitl_review")

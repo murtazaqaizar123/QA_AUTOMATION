@@ -93,8 +93,15 @@ program
   )
   .option("--output <dir>", "Output directory for test case files", "./output")
   .option("--skip-hitl", "Skip human review and auto-approve test cases")
+  .option("--mode <mode>", "Pipeline mode (full | prd-only)", "full")
   .action(async (opts) => {
     console.log(chalk.bold.cyan("\n🏭  QA Factory — Starting Pipeline\n"));
+
+    const mode: "full" | "prd-only" = opts.mode === "prd-only" ? "prd-only" : "full";
+    if (opts.mode && opts.mode !== "full" && opts.mode !== "prd-only") {
+      console.error(chalk.red(`✗ Invalid mode "${opts.mode}". Valid modes: full, prd-only`));
+      process.exit(1);
+    }
 
     // 1. Load project
     const project = getProject(opts.project);
@@ -104,7 +111,7 @@ program
     }
 
     // 2. Validate paths
-    const validationErrors = validateProjectConfig(project);
+    const validationErrors = validateProjectConfig(project, mode);
     if (validationErrors.length > 0) {
       console.error(chalk.red("✗ Project config errors:"));
       validationErrors.forEach((e) => console.error(chalk.red(`  - ${e}`)));
@@ -142,6 +149,7 @@ program
         outputPath: opts.output,
       },
       userStory: finalStory,
+      pipelineMode: mode,
     };
 
     // 6. Run pipeline until HITL interrupt

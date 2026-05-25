@@ -18,6 +18,12 @@ export const QAFactoryState = Annotation.Root({
     reducer: (_, next) => next,
   }),
 
+  // ── Pipeline mode ─────────────────────────────────────────
+  pipelineMode: Annotation<"full" | "prd-only">({
+    reducer: (_, next) => next,
+    default: () => "full",
+  }),
+
   // ── Surveyor output ──────────────────────────────────────
   prismaModels: Annotation<PrismaModel[]>({
     reducer: (_, next) => next,
